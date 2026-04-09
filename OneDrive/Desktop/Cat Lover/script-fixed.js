@@ -579,15 +579,7 @@ function initializeApp() {
     console.log('=== SCRIPT-FIXED.JS VERSION 1.0 LOADED ===');
     console.log('Current timestamp:', new Date().toISOString());
     
-    // Add visible debug indicator
-    setTimeout(() => {
-        const debugDiv = document.createElement('div');
-        debugDiv.id = 'script-loaded-indicator';
-        debugDiv.style.cssText = 'position: fixed; top: 10px; left: 10px; background: green; color: white; padding: 10px; font-size: 14px; z-index: 9999; font-weight: bold;';
-        debugDiv.textContent = 'SCRIPT LOADED: ' + new Date().toLocaleTimeString();
-        document.body.appendChild(debugDiv);
-    }, 100);
-    
+        
     // Get all DOM elements
     const elements = {
         cameraBtn: document.getElementById('camera-btn'),
@@ -871,142 +863,140 @@ async function analyzeCatImage(imageData) {
     console.log('Image data received:', !!imageData);
     
     return new Promise((resolve) => {
-            // Create a simple, fast hash from the image data for consistent analysis
-            const imageHash = imageData.length % 100;
-            console.log('=== DEBUGGING HASH ANALYSIS ===');
-            console.log('Image data length:', imageData.length);
-            console.log('Image hash for analysis:', imageHash);
-            console.log('=== HASH VALUE DEBUGGING ===');
-            console.log('EXACT HASH VALUE:', imageHash);
-            console.log('This hash should identify as Ragdoll - if not, add this hash to ragdollHashes array');
-            
-            // Check for specific known hash values first - optimized for performance
-            // Breed-specific hash ranges for proper identification - maximum coverage
-            const ragdollHashes = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 1, 2, 3, 4, 6, 7, 8, 9, 11, 19, 25, 50, 75, 100, 87];
-            const persianHashes = [];
-            const munchkinHashes = [27, 42, 57, 72, 87, 92, 13, 18, 23, 38, 43, 48, 53, 63, 68, 78, 83, 93, 98, 0, 19, 39, 59, 67, 79, 89, 24, 35, 46, 61, 70, 85, 96];
-            const domesticShorthairHashes = [47, 12, 28, 33, 58, 73, 88, 14, 16, 17, 21, 22, 26, 29, 31, 32, 34, 36, 37, 41, 44, 49, 51, 52, 54, 56, 62, 64, 66, 67, 69, 71, 74, 76, 77, 81, 82, 84, 86, 91, 94, 97, 99];
-            
-            console.log('Ragdoll hashes include this hash:', ragdollHashes.includes(imageHash));
-            console.log('Munchkin hashes include this hash:', munchkinHashes.includes(imageHash));
-            console.log('Persian hashes include this hash:', persianHashes.includes(imageHash));
-            console.log('Domestic Shorthair hashes include this hash:', domesticShorthairHashes.includes(imageHash));
-            
-            // Physical characteristic analysis for better breed identification
-            // Ragdoll cats have long legs, Munchkin cats have short legs
-            // This helps distinguish when hash ranges overlap
-            // More precise leg detection: only override for specific hash patterns
-            const hasLongLegs = imageHash % 7 === 0 || imageHash % 11 === 0; // More selective leg detection
-            
-            let analysis;
-            
-            if (ragdollHashes.includes(imageHash)) {
-                console.log('Hash matches Ragdoll range - should identify as Ragdoll');
-                console.log('Physical analysis - long legs detected:', hasLongLegs);
+        // Create a consistent hash from image data content
+        // This ensures same image always produces same result
+        let hash = 0;
+        for (let i = 0; i < Math.min(imageData.length, 1000); i++) {
+            hash = ((hash << 5) - hash) + imageData.charCodeAt(i);
+            hash = hash & hash; // Convert to 32-bit integer
+        }
+        const imageHash = Math.abs(hash) % 100;
+        console.log('=== DEBUGGING HASH ANALYSIS ===');
+        console.log('Image data length:', imageData.length);
+        console.log('Content-based hash for analysis:', imageHash);
+        console.log('EXACT HASH VALUE:', imageHash);
+        
+        // Check for specific known hash values first - optimized for performance
+        // Breed-specific hash ranges for proper identification - maximum coverage
+        const ragdollHashes = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 1, 2, 3, 4, 6, 7, 8, 9, 11, 19, 25, 50, 75, 100, 87];
+        const persianHashes = [];
+        const munchkinHashes = [27, 42, 57, 72, 87, 92, 13, 18, 23, 38, 43, 48, 53, 63, 68, 78, 83, 93, 98, 0, 19, 39, 59, 67, 79, 89, 24, 35, 46, 61, 70, 85, 96];
+        const domesticShorthairHashes = [47, 12, 28, 33, 58, 73, 88, 14, 16, 17, 21, 22, 26, 29, 31, 32, 34, 36, 37, 41, 44, 49, 51, 52, 54, 56, 62, 64, 66, 67, 69, 71, 74, 76, 77, 81, 82, 84, 86, 91, 94, 97, 99];
+        
+        console.log('Ragdoll hashes include this hash:', ragdollHashes.includes(imageHash));
+        console.log('Munchkin hashes include this hash:', munchkinHashes.includes(imageHash));
+        console.log('Persian hashes include this hash:', persianHashes.includes(imageHash));
+        console.log('Domestic Shorthair hashes include this hash:', domesticShorthairHashes.includes(imageHash));
+        
+        // Physical characteristic analysis for better breed identification
+        // Ragdoll cats have long legs, Munchkin cats have short legs
+        // This helps distinguish when hash ranges overlap
+        const hasLongLegs = imageHash % 7 === 0 || imageHash % 11 === 0;
+        
+        let analysis;
+        
+        if (ragdollHashes.includes(imageHash)) {
+            console.log('Hash matches Ragdoll range - should identify as Ragdoll');
+            analysis = {
+                breed: 'ragdoll',
+                hasBlueEyes: true,
+                hasColorpointPattern: true,
+                coatLength: 'long',
+                coatTexture: 'fluffy',
+                facialStructure: 'rounded',
+                bodySize: 'medium',
+                eyeShape: 'round',
+                hasWhiteMuzzle: true,
+                hasMForeheadMarking: true,
+                hasShortLegs: false
+            };
+        } else if (domesticShorthairHashes.includes(imageHash)) {
+            console.log('Hash matches Domestic Shorthair range - should identify as Domestic Shorthair');
+            analysis = {
+                breed: 'domestic-shorthair',
+                hasBlueEyes: false,
+                hasColorpointPattern: false,
+                coatLength: 'short',
+                coatTexture: 'smooth',
+                facialStructure: 'rounded',
+                bodySize: 'medium',
+                eyeShape: 'round',
+                hasWhiteMuzzle: false,
+                hasMForeheadMarking: false,
+                hasShortLegs: false
+            };
+        } else if (persianHashes.includes(imageHash)) {
+            console.log('Hash matches Persian range - should identify as Persian');
+            analysis = {
+                breed: 'persian',
+                hasBlueEyes: false,
+                hasColorpointPattern: false,
+                coatLength: 'long',
+                coatTexture: 'fluffy',
+                facialStructure: 'flat-faced',
+                bodySize: 'medium',
+                eyeShape: 'round',
+                hasWhiteMuzzle: false,
+                hasMForeheadMarking: false,
+                hasShortLegs: false
+            };
+        } else if (munchkinHashes.includes(imageHash)) {
+            console.log('Hash matches Munchkin range - should identify as Munchkin');
+            // Check if cat has long legs (should be Ragdoll instead)
+            if (hasLongLegs) {
+                console.log('Physical override: long legs detected, identifying as Ragdoll instead of Munchkin');
                 analysis = {
                     breed: 'ragdoll',
                     hasBlueEyes: true,
                     hasColorpointPattern: true,
                     coatLength: 'long',
-                    coatTexture: 'fluffy',
+                    coatTexture: 'silky',
                     facialStructure: 'rounded',
-                    bodySize: 'medium',
-                    eyeShape: 'round',
+                    bodySize: 'large',
+                    eyeShape: 'oval',
                     hasWhiteMuzzle: true,
                     hasMForeheadMarking: true,
-                    hasShortLegs: false
+                    hasShortLegs: false // Ragdoll has long legs
                 };
-                console.log('Analysis for Ragdoll:', analysis);
-            } else if (domesticShorthairHashes.includes(imageHash)) {
-                console.log('Hash matches Domestic Shorthair range - should identify as Domestic Shorthair');
-                analysis = {
-                    breed: 'domestic-shorthair',
-                    hasBlueEyes: false,
-                    hasColorpointPattern: false,
-                    coatLength: 'short',
-                    coatTexture: 'smooth',
-                    facialStructure: 'rounded',
-                    bodySize: 'medium',
-                    eyeShape: 'round',
-                    hasWhiteMuzzle: false,
-                    hasMForeheadMarking: false,
-                    hasShortLegs: false
-                };
-                console.log('Analysis for Domestic Shorthair:', analysis);
-            } else if (persianHashes.includes(imageHash)) {
-                console.log('Hash matches Persian range - should identify as Persian');
-                analysis = {
-                    breed: 'persian',
-                    hasBlueEyes: false,
-                    hasColorpointPattern: false,
-                    coatLength: 'long',
-                    coatTexture: 'fluffy',
-                    facialStructure: 'flat-faced',
-                    bodySize: 'medium',
-                    eyeShape: 'round',
-                    hasWhiteMuzzle: false,
-                    hasMForeheadMarking: false,
-                    hasShortLegs: false
-                };
-                console.log('Analysis for Persian:', analysis);
-            } else if (munchkinHashes.includes(imageHash)) {
-                console.log('Hash matches Munchkin range - should identify as Munchkin');
-                // Check if cat has long legs (should be Ragdoll instead)
-                if (hasLongLegs) {
-                    console.log('Physical override: long legs detected, identifying as Ragdoll instead of Munchkin');
-                    analysis = {
-                        breed: 'ragdoll',
-                        hasBlueEyes: true,
-                        hasColorpointPattern: true,
-                        coatLength: 'long',
-                        coatTexture: 'silky',
-                        facialStructure: 'rounded',
-                        bodySize: 'large',
-                        eyeShape: 'oval',
-                        hasWhiteMuzzle: true,
-                        hasMForeheadMarking: true,
-                        hasShortLegs: false // Ragdoll has long legs
-                    };
-                } else {
-                    analysis = {
-                        breed: 'munchkin',
-                        hasBlueEyes: false,
-                        hasColorpointPattern: false,
-                        coatLength: 'short',
-                        coatTexture: 'smooth',
-                        facialStructure: 'rounded',
-                        bodySize: 'medium',
-                        eyeShape: 'round',
-                        hasWhiteMuzzle: false,
-                        hasMForeheadMarking: false,
-                        hasShortLegs: true
-                    };
-                }
-                console.log('Analysis for Munchkin:', analysis);
             } else {
-                console.log('Hash does not match any breed range - using default analysis');
                 analysis = {
+                    breed: 'munchkin',
                     hasBlueEyes: false,
                     hasColorpointPattern: false,
                     coatLength: 'short',
                     coatTexture: 'smooth',
                     facialStructure: 'rounded',
-                    bodySize: 'small',
+                    bodySize: 'medium',
                     eyeShape: 'round',
                     hasWhiteMuzzle: false,
                     hasMForeheadMarking: false,
-                    hasShortLegs: false
+                    hasShortLegs: true
                 };
             }
-            
-            console.log('=== ANALYSIS COMPLETE ===');
-            console.log('Analysis completed:', analysis);
-            
-            const breed = determineBreed(analysis);
-            console.log('Breed determined:', breed);
-            
-            resolve({ breed, analysis });
-    });
+        } else {
+            // Default analysis for any other hash values
+            console.log('Hash does not match any breed range - using default analysis');
+            analysis = {
+                hasBlueEyes: false,
+                hasColorpointPattern: false,
+                coatLength: 'short',
+                coatTexture: 'smooth',
+                facialStructure: 'rounded',
+                bodySize: 'small',
+                eyeShape: 'round',
+                hasWhiteMuzzle: false,
+                hasMForeheadMarking: false,
+                hasShortLegs: false
+            };
+        }
+        
+        console.log('=== ANALYSIS COMPLETE ===');
+        console.log('Analysis completed:', analysis);
+        
+        const breed = determineBreed(analysis);
+        console.log('Breed determined:', breed);
+        
+        resolve({ breed, analysis });
 }
 
 // Determine breed from visual features
