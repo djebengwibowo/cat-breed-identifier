@@ -576,8 +576,15 @@ const catBreeds = {
 // Initialize app when DOM is ready
 function initializeApp() {
     console.log('=== INITIALIZING APP ===');
-    console.log('=== SCRIPT-FIXED.JS VERSION 1.0 LOADED ===');
+    console.log('=== SCRIPT.JS VERSION 2.0 LOADED ===');
     console.log('Current timestamp:', new Date().toISOString());
+    
+    // Add on-page debugging for GitHub deployment
+    const debugDiv = document.createElement('div');
+    debugDiv.id = 'debug-info';
+    debugDiv.style.cssText = 'position: fixed; top: 10px; right: 10px; background: red; color: white; padding: 5px; font-size: 12px; z-index: 9999;';
+    debugDiv.textContent = 'Script loaded: ' + new Date().toLocaleTimeString();
+    document.body.appendChild(debugDiv);
     
     // Get all DOM elements
     const elements = {
@@ -617,17 +624,29 @@ function initializeApp() {
     // Setup camera button
     if (elements.cameraBtn) {
         elements.cameraBtn.addEventListener('click', () => {
+            console.log('Camera button clicked!');
+            debugDiv.textContent = 'Camera clicked: ' + new Date().toLocaleTimeString();
             handleCamera();
         });
         console.log('Camera button listener attached');
+        debugDiv.textContent += ' | Camera OK';
+    } else {
+        console.log('Camera button not found');
+        debugDiv.textContent += ' | Camera NOT FOUND';
     }
     
     // Setup upload button
     if (elements.uploadBtn) {
         elements.uploadBtn.addEventListener('click', () => {
+            console.log('Upload button clicked!');
+            debugDiv.textContent = 'Upload clicked: ' + new Date().toLocaleTimeString();
             handleUpload();
         });
         console.log('Upload button listener attached');
+        debugDiv.textContent += ' | Upload OK';
+    } else {
+        console.log('Upload button not found');
+        debugDiv.textContent += ' | Upload NOT FOUND';
     }
     
     // Setup file input
