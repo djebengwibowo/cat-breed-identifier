@@ -579,6 +579,13 @@ function initializeApp() {
     console.log('=== SCRIPT-FIXED.JS VERSION 1.0 LOADED ===');
     console.log('Current timestamp:', new Date().toISOString());
     
+    // Add visible debug indicator
+    const debugDiv = document.createElement('div');
+    debugDiv.id = 'script-loaded-indicator';
+    debugDiv.style.cssText = 'position: fixed; top: 10px; left: 10px; background: green; color: white; padding: 10px; font-size: 14px; z-index: 9999; font-weight: bold;';
+    debugDiv.textContent = 'SCRIPT LOADED: ' + new Date().toLocaleTimeString();
+    document.body.appendChild(debugDiv);
+    
     // Get all DOM elements
     const elements = {
         cameraBtn: document.getElementById('camera-btn'),
