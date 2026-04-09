@@ -724,18 +724,26 @@ function updateLanguage() {
 
 // Handle camera capture
 function handleCamera() {
+    console.log('=== HANDLE CAMERA CALLED ===');
+    const debugDiv = document.getElementById('debug-info');
+    if (debugDiv) debugDiv.textContent = 'Camera handler called: ' + new Date().toLocaleTimeString();
+    
     // Check if mediaDevices is available
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        console.log('Camera API available, creating file input');
         // Create a file input to trigger camera
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
         fileInput.accept = 'image/*';
         fileInput.capture = 'environment';
         fileInput.onchange = (e) => {
+            console.log('Camera file input changed:', e.target.files);
+            if (debugDiv) debugDiv.textContent = 'Camera file selected: ' + new Date().toLocaleTimeString();
             handleFileSelect(e.target.files[0]);
         };
         fileInput.click();
     } else {
+        console.log('Camera API not available, falling back to upload');
         // Fallback to file upload if camera API not available
         handleUpload();
     }
@@ -743,11 +751,17 @@ function handleCamera() {
 
 // Handle file upload
 function handleUpload() {
+    console.log('=== HANDLE UPLOAD CALLED ===');
+    const debugDiv = document.getElementById('debug-info');
+    if (debugDiv) debugDiv.textContent = 'Upload handler called: ' + new Date().toLocaleTimeString();
+    
     // Create a file input if it doesn't exist
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
     fileInput.accept = 'image/*';
     fileInput.onchange = (e) => {
+        console.log('Upload file input changed:', e.target.files);
+        if (debugDiv) debugDiv.textContent = 'Upload file selected: ' + new Date().toLocaleTimeString();
         handleFileSelect(e.target.files[0]);
     };
     fileInput.click();
