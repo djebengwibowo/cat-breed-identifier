@@ -580,11 +580,13 @@ function initializeApp() {
     console.log('Current timestamp:', new Date().toISOString());
     
     // Add visible debug indicator
-    const debugDiv = document.createElement('div');
-    debugDiv.id = 'script-loaded-indicator';
-    debugDiv.style.cssText = 'position: fixed; top: 10px; left: 10px; background: green; color: white; padding: 10px; font-size: 14px; z-index: 9999; font-weight: bold;';
-    debugDiv.textContent = 'SCRIPT LOADED: ' + new Date().toLocaleTimeString();
-    document.body.appendChild(debugDiv);
+    setTimeout(() => {
+        const debugDiv = document.createElement('div');
+        debugDiv.id = 'script-loaded-indicator';
+        debugDiv.style.cssText = 'position: fixed; top: 10px; left: 10px; background: green; color: white; padding: 10px; font-size: 14px; z-index: 9999; font-weight: bold;';
+        debugDiv.textContent = 'SCRIPT LOADED: ' + new Date().toLocaleTimeString();
+        document.body.appendChild(debugDiv);
+    }, 100);
     
     // Get all DOM elements
     const elements = {
@@ -593,7 +595,7 @@ function initializeApp() {
         searchBtn: document.getElementById('search-btn'),
         newPhotoBtn: document.getElementById('new-photo-btn'),
         shareBtn: document.getElementById('share-btn'),
-        fileInput: document.getElementById('file-input'),
+        fileInput: null, // Will be created dynamically
         uploadedImage: document.getElementById('uploaded-image'),
         loadingState: document.getElementById('loading-state'),
         resultSection: document.getElementById('result-section'),
@@ -637,15 +639,8 @@ function initializeApp() {
         console.log('Upload button listener attached');
     }
     
-    // Setup file input
-    if (elements.fileInput) {
-        elements.fileInput.addEventListener('change', (e) => {
-            handleFileSelect(e.target.files[0]);
-        });
-        console.log('File input listener attached');
-    } else {
-        console.log('File input element not found!');
-    }
+    // File input will be created dynamically when needed
+    console.log('File input will be created dynamically');
     
     // Setup search button
     if (elements.searchBtn) {
