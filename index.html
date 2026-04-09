@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CatLover - Cat Breed Identifier</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .mobile-container {
+            max-width: 428px;
+            margin: 0 auto;
+        }
+        .cat-card {
+            transition: all 0.3s ease;
+        }
+        .cat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-50 to-pink-50 min-h-screen">
+    <div class="mobile-container">
+        <!-- Header -->
+        <header class="bg-white shadow-lg rounded-b-3xl">
+            <div class="p-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-cat text-purple-600 text-2xl"></i>
+                        <h1 class="text-xl font-bold text-gray-800" data-translate="app-title">CatLover</h1>
+                    </div>
+                    <select id="language-select" class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-300">
+                        <option value="en">English</option>
+                        <option value="id">Bahasa Indonesia</option>
+                        <option value="zh">Chinese</option>
+                        <option value="fr">French</option>
+                        <option value="es">Spanish</option>
+                        <option value="de">German</option>
+                        <option value="ja">Japanese</option>
+                        <option value="ko">Korean</option>
+                    </select>
+                </div>
+                <p class="text-sm text-gray-600 mt-2" data-translate="app-subtitle">Professional Cat Breed Identifier</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="p-4">
+            <!-- Photo Section -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-4">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4" data-translate="photo-title">Cat Photo</h2>
+                
+                <div class="text-center mb-6">  
+                <div id="photo-preview" class="mb-4">
+                    <div id="placeholder-image" class="bg-gray-100 rounded-xl h-64 flex items-center justify-center border-2 border-dashed border-gray-300">
+                        <div class="text-center">
+                            <i class="fas fa-camera text-gray-400 text-4xl mb-2"></i>
+                            <p class="text-gray-500 text-sm" data-translate="photo-placeholder">Take or upload a cat photo</p>
+                        </div>
+                    </div>
+                    <img id="uploaded-image" class="w-full h-64 object-cover rounded-xl hidden" alt="Cat photo">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button id="camera-btn" class="bg-purple-600 text-white py-3 px-4 rounded-xl font-medium hover:bg-purple-700 transition-colors flex items-center justify-center space-x-2">
+                        <i class="fas fa-camera"></i>
+                        <span data-translate="camera-btn">Take Photo</span>
+                    </button>
+                    <button id="upload-btn" class="bg-pink-600 text-white py-3 px-4 rounded-xl font-medium hover:bg-pink-700 transition-colors flex items-center justify-center space-x-2">
+                        <i class="fas fa-upload"></i>
+                        <span data-translate="upload-btn">Upload Photo</span>
+                    </button>
+                </div>
+                <!-- File input will be created dynamically by JavaScript -->
+            </div>
+
+            <!-- Search Button -->
+            <button id="search-btn" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 rounded-2xl font-semibold text-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-3" disabled>
+                <i class="fas fa-search"></i>
+                <span data-translate="search-btn">Identify Cat Breed</span>
+            </button>
+
+            <!-- Loading State -->
+            <div id="loading-state" class="hidden bg-white rounded-2xl shadow-lg p-8 text-center">
+                <div class="loading-spinner mx-auto mb-4"></div>
+                <p class="text-gray-600" data-translate="analyzing">Analyzing cat photo...</p>
+            </div>
+
+            <!-- Results Section -->
+            <div id="results-section" class="hidden fade-in">
+                <!-- Cat Info Card -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-4 cat-card">
+                    <div class="flex items-center space-x-4 mb-4">
+                        <img id="result-image" class="w-20 h-20 rounded-xl object-cover" alt="Identified cat">
+                        <div>
+                            <h3 id="breed-name" class="text-xl font-bold text-gray-800"></h3>
+                            <span id="breed-type" class="inline-block bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium"></span>
+                        </div>
+                    </div>
+
+                    <!-- Quick Summary -->
+                    <div class="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-4 mb-4">
+                        <h4 class="font-semibold text-purple-800 mb-3 flex items-center">
+                            <i class="fas fa-star mr-2"></i>
+                            <span data-translate="summary">Quick Summary</span>
+                        </h4>
+                        <div class="grid grid-cols-1 gap-2 text-sm">
+                            <div class="flex items-start">
+                                <i class="fas fa-tag text-purple-600 mr-2 mt-1"></i>
+                                <div>
+                                    <strong class="text-gray-700" data-translate="type">Type:</strong>
+                                    <p id="summary-type" class="text-gray-600"></p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-heart text-pink-600 mr-2 mt-1"></i>
+                                <div>
+                                    <strong class="text-gray-700" data-translate="personality">Personality:</strong>
+                                    <p id="summary-personality" class="text-gray-600"></p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-exclamation-triangle text-yellow-600 mr-2 mt-1"></i>
+                                <div>
+                                    <strong class="text-gray-700" data-translate="risks">Biggest Risks:</strong>
+                                    <p id="summary-risks" class="text-gray-600"></p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-shield-alt text-green-600 mr-2 mt-1"></i>
+                                <div>
+                                    <strong class="text-gray-700" data-translate="priorities">Care Priorities:</strong>
+                                    <p id="summary-priorities" class="text-gray-600"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Age Estimation -->
+                    <div class="bg-blue-50 rounded-xl p-4 mb-4">
+                        <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
+                            <i class="fas fa-calendar-alt mr-2"></i>
+                            <span data-translate="age-estimation">Age Estimation</span>
+                        </h4>
+                        <p id="age-estimation" class="text-sm text-gray-700"></p>
+                    </div>
+
+                    <!-- Feeding Plan -->
+                    <div class="bg-green-50 rounded-xl p-4 mb-4">
+                        <h4 class="font-semibold text-green-800 mb-3 flex items-center">
+                            <i class="fas fa-utensils mr-2"></i>
+                            <span data-translate="feeding-plan">Daily Feeding Plan</span>
+                        </h4>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between bg-white rounded-lg p-3">
+                                <span class="text-sm font-medium text-gray-700" data-translate="daily-grams">Daily Amount:</span>
+                                <span id="daily-grams" class="text-sm font-bold text-green-700"></span>
+                            </div>
+                            <div class="bg-white rounded-lg p-3">
+                                <p class="text-sm font-medium text-gray-700 mb-2" data-translate="schedule">Schedule:</p>
+                                <p id="feeding-schedule" class="text-sm text-gray-600 whitespace-pre-line"></p>
+                            </div>
+                            <div class="bg-yellow-50 rounded-lg p-3">
+                                <p class="text-sm font-medium text-gray-700 mb-1" data-translate="notes">Notes:</p>
+                                <p id="feeding-notes" class="text-xs text-gray-600"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <!-- History -->
+                        <div class="bg-purple-50 rounded-xl p-4">
+                            <h4 class="font-semibold text-purple-800 mb-2 flex items-center">
+                                <i class="fas fa-history mr-2"></i>
+                                <span data-translate="history">History</span>
+                            </h4>
+                            <p id="breed-history" class="text-sm text-gray-700"></p>
+                        </div>
+
+                        <!-- Care Instructions -->
+                        <div class="bg-pink-50 rounded-xl p-4">
+                            <h4 class="font-semibold text-pink-800 mb-2 flex items-center">
+                                <i class="fas fa-heart mr-2"></i>
+                                <span data-translate="care">Care Instructions</span>
+                            </h4>
+                            <p id="care-instructions" class="text-sm text-gray-700"></p>
+                        </div>
+
+                        <!-- Recommended Food -->
+                        <div class="bg-green-50 rounded-xl p-4">
+                            <h4 class="font-semibold text-green-800 mb-2 flex items-center">
+                                <i class="fas fa-utensils mr-2"></i>
+                                <span data-translate="food">Recommended Food</span>
+                            </h4>
+                            <p id="recommended-food" class="text-sm text-gray-700"></p>
+                        </div>
+
+                        <!-- Disease Warnings -->
+                        <div class="bg-yellow-50 rounded-xl p-4">
+                            <h4 class="font-semibold text-yellow-800 mb-2 flex items-center">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                <span data-translate="diseases">Disease Warnings</span>
+                            </h4>
+                            <p id="disease-warnings" class="text-sm text-gray-700"></p>
+                        </div>
+
+                        <!-- Treatments -->
+                        <div class="bg-blue-50 rounded-xl p-4">
+                            <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
+                                <i class="fas fa-pills mr-2"></i>
+                                <span data-translate="treatments">Treatments & Medications</span>
+                            </h4>
+                            <p id="treatments" class="text-sm text-gray-700"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="grid grid-cols-2 gap-3">
+                    <button id="new-photo-btn" class="bg-gray-600 text-white py-3 rounded-xl font-medium hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-redo mr-2"></i>
+                        <span data-translate="new-photo">New Photo</span>
+                    </button>
+                    <button id="share-btn" class="bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-share-alt mr-2"></i>
+                        <span data-translate="share">Share</span>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white rounded-t-3xl shadow-lg mt-8 p-4">
+            <div class="bg-white rounded-2xl shadow-xl p-6 mobile-container">
+                <div class="text-center mb-6">
+                    <h1 class="text-3xl font-bold text-purple-600 mb-2" data-translate="app-title">CatLover</h1>
+                    <p class="text-gray-600" data-translate="app-subtitle">Professional Cat Breed Identifier</p>
+                </div>
+                <p class="text-xs text-gray-400 mt-1" data-translate="disclaimer">AI-powered identification | Consult vet for medical advice</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script-fixed.js"></script>
+</body>
+</html>
